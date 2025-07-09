@@ -1,0 +1,228 @@
+/* === Nexora OS Global Styles === */
+
+/* Import fonts - Change these to use different fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Segoe+UI&display=swap');
+
+/* 
+  CSS Variables - Easy way to change colors, shadows, and other properties site-wide
+  Modify these values to change the overall theme
+*/
+:root {
+  --color-bg-light: #f0f0f3;       /* Light mode background */
+  --color-bg-dark: #121217;         /* Dark mode background */
+  --color-accent: #4f9cff;         /* Primary accent color (buttons, highlights) */
+  --color-text-light: #222;         /* Text color for light mode */
+  --color-text-dark: #eee;          /* Text color for dark mode */
+  --color-window-bg: rgba(255 255 255 / 0.85);      /* Window transparency (light) */
+  --color-window-bg-dark: rgba(20 20 30 / 0.85);    /* Window transparency (dark) */
+  --border-radius: 16px;            /* Corner rounding amount */
+  --shadow-light: 0 8px 24px rgb(0 0 0 / 0.12);     /* Light shadow */
+  --shadow-dark: 0 8px 32px rgb(0 0 0 / 0.8);       /* Dark shadow */
+  --font-main: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;  /* Main UI font */
+  --font-mono: "Roboto Mono", monospace;            /* Monospace font for code/terminal */
+}
+
+/* Base styles - Affects the entire OS */
+body, html {
+  margin: 0; padding: 0; height: 100%;
+  font-family: var(--font-main);
+  background: var(--color-bg-dark);   /* Default dark theme */
+  color: var(--color-text-dark);
+  overflow: hidden;                   /* Prevents scrollbars */
+  user-select: none;                  /* Disable text selection by default */
+}
+
+/* Screen system - Controls visibility of different OS screens */
+.screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-dark);
+  color: var(--color-text-dark);
+  z-index: 999;
+}
+
+.screen.active {
+  display: block;
+}
+
+/* === Boot Screen Styles === */
+#boot-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  background: linear-gradient(135deg, #0a1a3c, #12305f);  /* Boot screen gradient */
+  color: white;
+}
+
+/* Logo styling - Replace the SVG to change the logo */
+.logo-container {
+  width: 180px;
+  height: 180px;
+  filter: drop-shadow(0 0 10px #4f9cffaa);  /* Glow effect */
+}
+
+/* Loading bar - Animation controlled by boot.js */
+.loading-bar {
+  width: 300px;
+  height: 12px;
+  background: rgba(255 255 255 / 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.loading-progress {
+  width: 0%;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 8px 0 0 8px;
+  transition: width 0.3s ease;
+}
+
+/* === Desktop Styles === */
+#desktop {
+  position: fixed;
+  inset: 0;
+  background-size: cover;            /* Wallpaper will cover entire screen */
+  background-position: center;
+  background-repeat: no-repeat;
+  user-select: none;
+  cursor: default;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;        /* Icons start from top-left */
+  padding: 16px;
+  gap: 12px;
+}
+
+/* Desktop icons grid - Adjust grid cell size as needed */
+#desktop-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 96px);
+  grid-auto-rows: 96px;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Individual desktop icon styling */
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-dark);
+  border-radius: var(--border-radius);
+  padding: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.desktop-icon:hover {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* === Taskbar Styles === */
+#taskbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--color-window-bg-dark);
+  backdrop-filter: blur(20px);       /* Frosted glass effect */
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 0.5);
+  z-index: 10000;                    /* Ensure taskbar stays on top */
+}
+
+/* Start button - Main menu trigger */
+#start-button {
+  font-size: 1.5rem;
+  color: var(--color-accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease;
+}
+
+/* Running apps area in taskbar */
+#taskbar-apps {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-left: 12px;
+}
+
+/* Active app highlight in taskbar */
+.taskbar-app-icon.active {
+  background-color: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent);
+}
+
+/* === Window Styles === */
+.window {
+  position: absolute;
+  background: var(--color-window-bg-dark);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-dark);
+  width: 600px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  overflow: hidden;
+  border: 1px solid rgba(255 255 255 / 0.12);
+  backdrop-filter: blur(12px);       /* Frosted glass effect */
+  transition: transform 0.2s ease;
+}
+
+/* Title bar - Contains window controls */
+.title-bar {
+  height: 36px;
+  background: rgba(0 0 0 / 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  cursor: grab;                      /* Indicates window is draggable */
+}
+
+/* Window content area */
+.app-content {
+  flex: 1;
+  background: rgba(255 255 255 / 0.85);
+  color: #111;
+  padding: 12px;
+  overflow: auto;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  user-select: text;                 /* Allow text selection in content */
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 768px) {
+  .window {
+    width: 90vw;
+    height: 70vh;
+  }
+  #desktop-icons {
+    grid-template-columns: repeat(auto-fill, 72px);
+    grid-auto-rows: 72px;
+  }
+  .desktop-icon img {
+    width: 36px;
+    height: 36px;
+  }
+}
