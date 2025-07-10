@@ -17,7 +17,7 @@ Fake system update with reboot simulation
 Easter egg hidden in system files and terminal commands
 
 How to Run
-Open index.html in any modern web browser.
+Open nexora-os.html in any modern web browser.
 The OS will boot, and if first time, show setup wizard.
 
 License
