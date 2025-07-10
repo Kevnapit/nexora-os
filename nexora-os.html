@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora OS</title>
+    <style>
+        /* RESET & BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000;
+            color: #fff;
+        }
+        
+        /* BOOT SCREEN */
+        .boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .boot-logo {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 2rem;
+            background-image: url('https://i.imgur.com/ujDxRqx.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.8; transform: scale(1); }
+        }
+        
+        .boot-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .boot-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6495ed, #7b68ee);
+            transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        
+        /* SETUP WIZARD */
+        .setup-wizard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 2rem;
+        }
+        
+        .setup-container {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            animation: smoothSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes smoothSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .setup-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .setup-step {
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .setup-step.active {
+            display: block;
+        }
+        
+        .setup-form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .setup-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .setup-input {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.5);
+            border-radius: 4px;
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+        
+        .setup-input:focus {
+            outline: none;
+            border-color: #6495ed;
+            box-shadow: 0 0 0 2px rgba(100, 149, 237, 0.3);
+        }
+        
+        .setup-select {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.5);
+            border-radius: 4px;
+            color: #fff;
+        }
+        
+        .setup-button {
+            background: #6495ed;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .setup-button:hover {
+            background: #7b68ee;
+            transform: translateY(-1px);
+        }
+        
+        .setup-button:active {
+            transform: translateY(0);
+        }
+        
+        .setup-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        /* Account Setup */
+        .setup-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #7b68ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .avatar-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            background: rgba(100, 100, 100, 0.3);
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.1);
+            background: rgba(100, 149, 237, 0.3);
+        }
+        
+        .avatar-option.selected {
+            border: 2px solid #6495ed;
+            transform: scale(1.2);
+            background: rgba(100, 149, 237, 0.5);
+        }
+        
+        /* DESKTOP */
+        .desktop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 40px);
+            background-color: #4b0082; /* Solid purple */
+            display: none;
+            overflow: hidden;
+        }
+        
+        .desktop-icons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 80px);
+            grid-auto-rows: 80px;
+            gap: 10px;
+            padding: 20px;
+            align-content: start;
+        }
+        
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            will-change: transform;
+        }
+        
+        .desktop-icon:hover {
+            background: rgba(100, 149, 237, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .desktop-icon:active {
+            transform: translateY(0);
+        }
+        
+        .desktop-icon-img {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        /* TASKBAR */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(30, 30, 30, 0.9);
+            display: flex;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            will-change: transform;
+        }
+        
+        .start-button {
+            height: 100%;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .start-button:hover {
+            background: rgba(100, 149, 237, 0.3);
+        }
+        
+        .taskbar-apps {
+            display: flex;
+            height: 100%;
+            max-width: 60%;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .taskbar-apps::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .taskbar-apps-pinned {
+            display: flex;
+            height: 100%;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .taskbar-app {
+            height: 100%;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .taskbar-app.pinned {
+            border-left: none;
+        }
+        
+        .taskbar-app:hover {
+            background: rgba(100, 149, 237, 0.2);
+        }
+        
+        .taskbar-app.active {
+            background: rgba(100, 149, 237, 0.4);
+        }
+        
+        .taskbar-app.blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { background: rgba(100, 149, 237, 0.2); }
+            50% { background: rgba(100, 149, 237, 0.5); }
+            100% { background: rgba(100, 149, 237, 0.2); }
+        }
+        
+        .taskbar-app-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .taskbar-clock {
+            margin-left: auto;
+            padding: 0 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        /* WINDOW SYSTEM */
+        .window {
+            position: absolute;
+            min-width: 300px;
+            min-height: 200px;
+            background: rgba(40, 40, 40, 0.95);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            resize: both;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity;
+        }
+        
+        .window.active {
+            z-index: 11;
+            border: 1px solid rgba(100, 149, 237, 0.5);
+        }
+        
+        .window-header {
+            height: 30px;
+            background: rgba(30, 30, 30, 0.95);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            cursor: move;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .window-title {
+            flex-grow: 1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .window-controls {
+            display: flex;
+        }
+        
+        .window-control {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .window-control:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .window-control.close:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+        
+        .window-content {
+            flex-grow: 1;
+            overflow: auto;
+            padding: 10px;
+        }
+        
+        .window-minimized {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(100px);
+        }
+        
+        /* CONTEXT MENU */
+        .context-menu {
+            position: absolute;
+            background: rgba(40, 40, 40, 0.95);
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            min-width: 150px;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.15s ease-out forwards;
+        }
+        
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.1s;
+        }
+        
+        .context-menu-item:hover {
+            background: rgba(100, 149, 237, 0.5);
+        }
+        
+        .context-menu-separator {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+        }
+        
+        /* APPS */
+        /* Notepad */
+        .notepad-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            resize: none;
+            color: #fff;
+            padding: 5px;
+            font-family: 'Consolas', monospace;
+            line-height: 1.5;
+        }
+        
+        /* File Manager */
+        .file-manager-container {
+            display: flex;
+            height: 100%;
+        }
+        
+        .file-manager-sidebar {
+            width: 200px;
+            background: rgba(30, 30, 30, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .file-manager-content {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .file-manager-path {
+            padding: 5px 10px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .file-manager-files {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .file-manager-file {
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-manager-file:hover {
+            background: rgba(100, 149, 237, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .file-manager-file-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .file-manager-file-name {
+            font-size: 0.8rem;
+            word-break: break-all;
+            text-align: center;
+        }
+        
+        /* Settings */
+        .settings-container {
+            display: flex;
+            height: 100%;
+        }
+        
+        .settings-sidebar {
+            width: 200px;
+            background: rgba(30, 30, 30, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 0;
+            overflow-y: auto;
+        }
+        
+        .settings-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-category {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .settings-category:hover {
+            background: rgba(100, 149, 237, 0.2);
+        }
+        
+        .settings-category.active {
+            background: rgba(100, 149, 237, 0.4);
+        }
+        
+        .settings-section {
+            display: none;
+        }
+        
+        .settings-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .settings-group-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .settings-item-label {
+            font-size: 0.9rem;
+        }
+        
+        .settings-item-control {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Terminal */
+        .terminal-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .terminal-output {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+        
+        .terminal-input-line {
+            display: flex;
+            padding: 5px;
+            background: rgba(30, 30, 30, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .terminal-prompt {
+            margin-right: 5px;
+            color: #7b68ee;
+        }
+        
+        .terminal-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .terminal-input:focus {
+            outline: none;
+        }
+        
+        /* Security Center */
+        .security-center-container {
+            height: 100%;
+        }
+        
+        .security-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .security-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .security-tab:hover {
+            background: rgba(100, 149, 237, 0.2);
+        }
+        
+        .security-tab.active {
+            background: rgba(100, 149, 237, 0.4);
+            border-bottom: 2px solid #6495ed;
+        }
+        
+        .security-content {
+            padding: 15px;
+        }
+        
+        .security-section {
+            display: none;
+        }
+        
+        .security-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .scan-button {
+            background: #6495ed;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+        
+        .scan-button:hover {
+            background: #7b68ee;
+            transform: translateY(-1px);
+        }
+        
+        .scan-progress {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .scan-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6495ed, #7b68ee);
+            transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        
+        .scan-results {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 4px;
+        }
+        
+        .scan-results .threat {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        /* Sandbox */
+        .sandbox-container {
+            display: flex;
+            height: 100%;
+        }
+        
+        .sandbox-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sandbox-toolbar {
+            padding: 5px;
+            background: rgba(30, 30, 30, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 5px;
+        }
+        
+        .sandbox-code {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-family: 'Consolas', monospace;
+            padding: 10px;
+            border: none;
+            resize: none;
+            line-height: 1.5;
+        }
+        
+        .sandbox-preview {
+            flex: 1;
+            background: white;
+            position: relative;
+        }
+        
+        .sandbox-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .sandbox-scan-results {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 40%;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            display: none;
+        }
+        
+        /* Browser */
+        .browser-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .browser-toolbar {
+            display: flex;
+            padding: 5px;
+            background: rgba(30, 30, 30, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .browser-btn {
+            background: rgba(50, 50, 50, 0.8);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .browser-btn:hover {
+            background: rgba(100, 149, 237, 0.5);
+        }
+        
+        .browser-btn.go {
+            width: auto;
+            padding: 0 10px;
+        }
+        
+        .browser-address {
+            flex-grow: 1;
+            padding: 5px 10px;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.5);
+            border-radius: 4px;
+            color: white;
+        }
+        
+        .browser-content {
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        .browser-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Task Manager */
+        .taskmanager-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .taskmanager-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 10px;
+            background: rgba(30, 30, 30, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+        }
+        
+        .taskmanager-processes {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .taskmanager-process {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+        }
+        
+        .taskmanager-process:hover {
+            background: rgba(100, 149, 237, 0.1);
+        }
+        
+        .taskmanager-process-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .taskmanager-process-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .taskmanager-process-cpu {
+            color: #7b68ee;
+        }
+        
+        .taskmanager-process-memory {
+            color: #6495ed;
+        }
+        
+        .taskmanager-process-action {
+            color: #ff6b6b;
+            cursor: pointer;
+        }
+        
+        .taskmanager-refresh {
+            background: #6495ed;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+        
+        /* UPDATE SCREEN */
+        .update-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0c29;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        
+        .update-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .update-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .update-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6495ed, #7b68ee);
+            transition: width 0.3s;
+        }
+        
+        .update-status {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* NOTIFICATIONS */
+        .notification {
+            position: fixed;
+            bottom: 50px;
+            right: 20px;
+            background: rgba(40, 40, 40, 0.95);
+            border-radius: 8px;
+            padding: 15px;
+            width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            animation: fadeIn 0.3s ease-out;
+            border-left: 4px solid #6495ed;
+            transform: translateZ(0);
+        }
+        
+        .notification h4 {
+            margin-bottom: 5px;
+            color: #7b68ee;
+        }
+        
+        /* START MENU */
+        .start-menu {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            width: 300px;
+            height: 500px;
+            background: rgba(40, 40, 40, 0.95);
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .start-menu.visible {
+            transform: translateX(0);
+        }
+        
+        .start-menu-user {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7b68ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .start-menu-search {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .start-menu-search input {
+            width: 100%;
+            padding: 8px;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.5);
+            border-radius: 4px;
+            color: white;
+        }
+        
+        .start-menu-apps {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .app-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .app-item {
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .app-item:hover {
+            background: rgba(100, 149, 237, 0.2);
+        }
+        
+        .app-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .app-name {
+            font-size: 0.8rem;
+        }
+        
+        .start-menu-footer {
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .power-button {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .power-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* UTILITY CLASSES */
+        .hidden {
+            display: none !important;
+        }
+        
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-1 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-2 {
+            margin-top: 1rem;
+        }
+        
+        .mb-1 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Boot Screen -->
+    <div class="boot-screen">
+        <div class="boot-logo"></div>
+        <div class="boot-progress">
+            <div class="boot-progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Setup Wizard -->
+    <div class="setup-wizard">
+        <div class="setup-container">
+            <div class="setup-title">Nexora OS Setup</div>
+            
+            <!-- Language Step -->
+            <div class="setup-step active" id="step-language">
+                <div class="setup-form-group">
+                    <label class="setup-label">Select Language:</label>
+                    <select class="setup-select" id="language-select">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="ja">日本語</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
+                <div class="setup-footer">
+                    <button class="setup-button" id="language-next">Next</button>
+                </div>
+            </div>
+            
+            <!-- Account Step -->
+            <div class="setup-step" id="step-account">
+                <div class="setup-form-group text-center">
+                    <div class="setup-avatar" id="account-avatar">👤</div>
+                    <h3>Create Your Account</h3>
+                    <div class="avatar-options" id="avatar-options"></div>
+                </div>
+                <div class="account-form">
+                    <div class="setup-form-group">
+                        <label class="setup-label">Your Name</label>
+                        <input type="text" class="setup-input" id="account-name" placeholder="Enter your name">
+                    </div>
+                    <div class="setup-form-group">
+                        <label class="setup-label">Email Address</label>
+                        <input type="email" class="setup-input" id="account-email" placeholder="Enter your email">
+                    </div>
+                </div>
+                <div class="setup-footer">
+                    <button class="setup-button" id="account-back">Back</button>
+                    <button class="setup-button" id="account-next">Next</button>
+                </div>
+            </div>
+            
+            <!-- WiFi Step -->
+            <div class="setup-step" id="step-wifi">
+                <div class="setup-form-group">
+                    <label class="setup-label">Wi-Fi Network SSID:</label>
+                    <input type="text" class="setup-input" id="wifi-ssid" placeholder="Enter network name">
+                </div>
+                <div class="setup-form-group">
+                    <label class="setup-label">Password:</label>
+                    <input type="password" class="setup-input" id="wifi-password" placeholder="Enter password">
+                </div>
+                <div class="setup-footer">
+                    <button class="setup-button" id="wifi-back">Back</button>
+                    <button class="setup-button" id="wifi-next">Next</button>
+                </div>
+            </div>
+            
+            <!-- Privacy Step -->
+            <div class="setup-step" id="step-privacy">
+                <div class="setup-form-group">
+                    <h3>Privacy Settings</h3>
+                    <p>Choose your privacy preferences for Nexora OS:</p>
+                </div>
+                <div class="setup-form-group">
+                    <label class="setup-label">
+                        <input type="checkbox" id="telemetry-checkbox" checked>
+                        Send diagnostic and usage data
+                    </label>
+                </div>
+                <div class="setup-form-group">
+                    <label class="setup-label">
+                        <input type="checkbox" id="updates-checkbox" checked>
+                        Automatically check for updates
+                    </label>
+                </div>
+                <div class="setup-form-group">
+                    <label class="setup-label">
+                        <input type="checkbox" id="location-checkbox">
+                        Allow apps to use my location
+                    </label>
+                </div>
+                <div class="setup-footer">
+                    <button class="setup-button" id="privacy-back">Back</button>
+                    <button class="setup-button" id="privacy-finish">Finish Setup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Environment -->
+    <div class="desktop">
+        <div class="desktop-icons">
+            <div class="desktop-icon" data-app="file-manager">
+                <div class="desktop-icon-img">📁</div>
+                <div class="desktop-icon-name">Files</div>
+            </div>
+            <div class="desktop-icon" data-app="notepad">
+                <div class="desktop-icon-img">📝</div>
+                <div class="desktop-icon-name">Notepad</div>
+            </div>
+            <div class="desktop-icon" data-app="terminal">
+                <div class="desktop-icon-img">💻</div>
+                <div class="desktop-icon-name">Terminal</div>
+            </div>
+            <div class="desktop-icon" data-app="browser">
+                <div class="desktop-icon-img">🌐</div>
+                <div class="desktop-icon-name">Browser</div>
+            </div>
+            <div class="desktop-icon" data-app="settings">
+                <div class="desktop-icon-img">⚙️</div>
+                <div class="desktop-icon-name">Settings</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="start-button" id="start-button">
+            <span>Start</span>
+        </div>
+        <div class="taskbar-apps">
+            <div class="taskbar-apps-pinned">
+                <div class="taskbar-app pinned" data-app="file-manager">
+                    <div class="taskbar-app-icon">📁</div>
+                </div>
+                <div class="taskbar-app pinned" data-app="browser">
+                    <div class="taskbar-app-icon">🌐</div>
+                </div>
+                <div class="taskbar-app pinned" data-app="terminal">
+                    <div class="taskbar-app-icon">💻</div>
+                </div>
+            </div>
+            <div class="taskbar-apps-running" id="taskbar-apps-running"></div>
+        </div>
+        <div class="taskbar-clock" id="clock">12:00 PM</div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="start-menu">
+        <div class="start-menu-user">
+            <div class="user-avatar" id="user-avatar">👤</div>
+            <div class="user-info">
+                <div class="user-name" id="user-name">User</div>
+                <div class="user-email" id="user-email">user@nexora.com</div>
+            </div>
+        </div>
+        <div class="start-menu-search">
+            <input type="text" placeholder="Search apps and files">
+        </div>
+        <div class="start-menu-apps">
+            <div class="app-list">
+                <div class="app-item" data-app="file-manager">
+                    <div class="app-icon">📁</div>
+                    <div class="app-name">Files</div>
+                </div>
+                <div class="app-item" data-app="notepad">
+                    <div class="app-icon">📝</div>
+                    <div class="app-name">Notepad</div>
+                </div>
+                <div class="app-item" data-app="terminal">
+                    <div class="app-icon">💻</div>
+                    <div class="app-name">Terminal</div>
+                </div>
+                <div class="app-item" data-app="browser">
+                    <div class="app-icon">🌐</div>
+                    <div class="app-name">Browser</div>
+                </div>
+                <div class="app-item" data-app="settings">
+                    <div class="app-icon">⚙️</div>
+                    <div class="app-name">Settings</div>
+                </div>
+                <div class="app-item" data-app="security">
+                    <div class="app-icon">🔒</div>
+                    <div class="app-name">Security</div>
+                </div>
+                <div class="app-item" data-app="sandbox">
+                    <div class="app-icon">🧪</div>
+                    <div class="app-name">Sandbox</div>
+                </div>
+                <div class="app-item" data-app="taskmanager">
+                    <div class="app-icon">📊</div>
+                    <div class="app-name">Task Manager</div>
+                </div>
+            </div>
+        </div>
+        <div class="start-menu-footer">
+            <div class="power-button" id="power-button">⏻</div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item">New Folder</div>
+        <div class="context-menu-item">New File</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item">View</div>
+        <div class="context-menu-item">Sort By</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item">Properties</div>
+    </div>
+
+    <!-- App Windows -->
+    <!-- Notepad -->
+    <div class="window hidden" id="notepad-window" data-app="notepad">
+        <div class="window-header">
+            <div class="window-title">Notepad</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <textarea class="notepad-textarea" id="notepad-textarea"></textarea>
+        </div>
+    </div>
+
+    <!-- File Manager -->
+    <div class="window hidden" id="file-manager-window" data-app="file-manager">
+        <div class="window-header">
+            <div class="window-title">Files</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="file-manager-container">
+                <div class="file-manager-sidebar">
+                    <div class="file-manager-folder">Documents</div>
+                    <div class="file-manager-folder">Downloads</div>
+                    <div class="file-manager-folder">Pictures</div>
+                    <div class="file-manager-folder">Music</div>
+                    <div class="file-manager-folder">Videos</div>
+                </div>
+                <div class="file-manager-content">
+                    <div class="file-manager-path">/home/user</div>
+                    <div class="file-manager-files">
+                        <div class="file-manager-file">
+                            <div class="file-manager-file-icon">📄</div>
+                            <div class="file-manager-file-name">Document.txt</div>
+                        </div>
+                        <div class="file-manager-file">
+                            <div class="file-manager-file-icon">📄</div>
+                            <div class="file-manager-file-name">Notes.md</div>
+                        </div>
+                        <div class="file-manager-file">
+                            <div class="file-manager-file-icon">📁</div>
+                            <div class="file-manager-file-name">Projects</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal -->
+    <div class="window hidden" id="terminal-window" data-app="terminal">
+        <div class="window-header">
+            <div class="window-title">Terminal</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="terminal-container">
+                <div class="terminal-output" id="terminal-output">
+                    Nexora OS Terminal v1.0<br>
+                    Type 'help' for a list of commands.<br><br>
+                </div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">$</span>
+                    <input type="text" class="terminal-input" id="terminal-input">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="window hidden" id="settings-window" data-app="settings">
+        <div class="window-header">
+            <div class="window-title">Settings</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <div class="settings-category active" data-category="system">System</div>
+                    <div class="settings-category" data-category="display">Display</div>
+                    <div class="settings-category" data-category="network">Network</div>
+                    <div class="settings-category" data-category="privacy">Privacy</div>
+                    <div class="settings-category" data-category="accounts">Accounts</div>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-section active" id="system-settings">
+                        <div class="settings-group">
+                            <div class="settings-group-title">About</div>
+                            <div class="settings-item">
+                                <div class="settings-item-label">Nexora OS Version</div>
+                                <div class="settings-item-control">1.0.0</div>
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-item-label">System Architecture</div>
+                                <div class="settings-item-control">x64</div>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-group-title">Update</div>
+                            <div class="settings-item">
+                                <div class="settings-item-label">Check for Updates</div>
+                                <div class="settings-item-control">
+                                    <button class="setup-button">Check Now</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section" id="display-settings">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Display</div>
+                            <div class="settings-item">
+                                <div class="settings-item-label">Brightness</div>
+                                <div class="settings-item-control">
+                                    <input type="range" min="0" max="100" value="80">
+                                </div>
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-item-label">Night Light</div>
+                                <div class="settings-item-control">
+                                    <input type="checkbox" id="night-light">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browser -->
+    <div class="window hidden" id="browser-window" data-app="browser">
+        <div class="window-header">
+            <div class="window-title">Browser</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="browser-container">
+                <div class="browser-toolbar">
+                    <button class="browser-btn" id="browser-back">←</button>
+                    <button class="browser-btn" id="browser-forward">→</button>
+                    <button class="browser-btn" id="browser-refresh">⟳</button>
+                    <input type="text" class="browser-address" id="browser-address" value="https://nexora.com">
+                    <button class="browser-btn go" id="browser-go">Go</button>
+                </div>
+                <div class="browser-content">
+                    <iframe src="about:blank" class="browser-content-iframe" id="browser-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Center -->
+    <div class="window hidden" id="security-window" data-app="security">
+        <div class="window-header">
+            <div class="window-title">Security Center</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="security-center-container">
+                <div class="security-tabs">
+                    <div class="security-tab active" data-tab="overview">Overview</div>
+                    <div class="security-tab" data-tab="firewall">Firewall</div>
+                    <div class="security-tab" data-tab="virus">Virus Protection</div>
+                </div>
+                <div class="security-content">
+                    <div class="security-section active" id="overview-section">
+                        <h3>Security Status</h3>
+                        <p>Your system is currently protected.</p>
+                        <button class="scan-button" id="scan-button">Run Quick Scan</button>
+                        <div class="scan-progress hidden" id="scan-progress">
+                            <div class="scan-progress-bar" id="scan-progress-bar"></div>
+                        </div>
+                        <div class="scan-results hidden" id="scan-results"></div>
+                    </div>
+                    <div class="security-section" id="firewall-section">
+                        <h3>Firewall Settings</h3>
+                        <p>Configure your network firewall protection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sandbox -->
+    <div class="window hidden" id="sandbox-window" data-app="sandbox">
+        <div class="window-header">
+            <div class="window-title">Sandbox</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="sandbox-container">
+                <div class="sandbox-editor">
+                    <div class="sandbox-toolbar">
+                        <button class="browser-btn" id="run-sandbox">Run</button>
+                        <button class="browser-btn" id="clear-sandbox">Clear</button>
+                        <button class="browser-btn" id="scan-sandbox">Scan</button>
+                    </div>
+                    <textarea class="sandbox-code" id="sandbox-code" placeholder="Enter HTML code here..."></textarea>
+                </div>
+                <div class="sandbox-preview">
+                    <iframe class="sandbox-preview-iframe" id="sandbox-iframe"></iframe>
+                    <div class="sandbox-scan-results" id="sandbox-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Manager -->
+    <div class="window hidden" id="taskmanager-window" data-app="taskmanager">
+        <div class="window-header">
+            <div class="window-title">Task Manager</div>
+            <div class="window-controls">
+                <div class="window-control minimize">−</div>
+                <div class="window-control maximize">□</div>
+                <div class="window-control close">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="taskmanager-container">
+                <div class="taskmanager-header">
+                    <div>Process</div>
+                    <div>CPU</div>
+                    <div>Memory</div>
+                    <div>Action</div>
+                </div>
+                <div class="taskmanager-processes" id="taskmanager-processes">
+                    <div class="taskmanager-process">
+                        <div class="taskmanager-process-name">
+                            <div class="taskmanager-process-icon">📁</div>
+                            <div>File Manager</div>
+                        </div>
+                        <div class="taskmanager-process-cpu">12%</div>
+                        <div class="taskmanager-process-memory">45 MB</div>
+                        <div class="taskmanager-process-action">End</div>
+                    </div>
+                    <div class="taskmanager-process">
+                        <div class="taskmanager-process-name">
+                            <div class="taskmanager-process-icon">🌐</div>
+                            <div>Browser</div>
+                        </div>
+                        <div class="taskmanager-process-cpu">24%</div>
+                        <div class="taskmanager-process-memory">120 MB</div>
+                        <div class="taskmanager-process-action">End</div>
+                    </div>
+                    <div class="taskmanager-process">
+                        <div class="taskmanager-process-name">
+                            <div class="taskmanager-process-icon">💻</div>
+                            <div>Terminal</div>
+                        </div>
+                        <div class="taskmanager-process-cpu">8%</div>
+                        <div class="taskmanager-process-memory">32 MB</div>
+                        <div class="taskmanager-process-action">End</div>
+                    </div>
+                </div>
+                <button class="taskmanager-refresh" id="refresh-processes">Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Screen -->
+    <div class="update-screen hidden" id="update-screen">
+        <div class="update-title">Updating Nexora OS</div>
+        <div class="update-progress">
+            <div class="update-progress-bar"></div>
+        </div>
+        <div class="update-status" id="update-status">Downloading updates...</div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification hidden" id="notification">
+        <h4>Welcome to Nexora OS</h4>
+        <p>Your system is ready to use!</p>
+    </div>
+
+    <script>
+        // DOM Elements
+        const bootScreen = document.querySelector('.boot-screen');
+        const bootProgress = document.querySelector('.boot-progress-bar');
+        const setupWizard = document.querySelector('.setup-wizard');
+        const desktop = document.querySelector('.desktop');
+        const taskbar = document.querySelector('.taskbar');
+        const startButton = document.getElementById('start-button');
+        const startMenu = document.getElementById('start-menu');
+        const contextMenu = document.getElementById('context-menu');
+        const clock = document.getElementById('clock');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userEmail = document.getElementById('user-email');
+        const powerButton = document.getElementById('power-button');
+        const taskbarAppsRunning = document.getElementById('taskbar-apps-running');
+        
+        // Setup Wizard Elements
+        const setupSteps = document.querySelectorAll('.setup-step');
+        const languageNext = document.getElementById('language-next');
+        const accountBack = document.getElementById('account-back');
+        const accountNext = document.getElementById('account-next');
+        const wifiBack = document.getElementById('wifi-back');
+        const wifiNext = document.getElementById('wifi-next');
+        const privacyBack = document.getElementById('privacy-back');
+        const privacyFinish = document.getElementById('privacy-finish');
+        const accountAvatar = document.getElementById('account-avatar');
+        const accountName = document.getElementById('account-name');
+        const accountEmail = document.getElementById('account-email');
+        const avatarOptions = document.getElementById('avatar-options');
+        
+        // App Windows
+        const appWindows = document.querySelectorAll('.window');
+        const desktopIcons = document.querySelectorAll('.desktop-icon');
+        const taskbarApps = document.querySelectorAll('.taskbar-app');
+        const startMenuApps = document.querySelectorAll('.app-item');
+        
+        // Browser elements
+        const browserBackBtn = document.getElementById('browser-back');
+        const browserForwardBtn = document.getElementById('browser-forward');
+        const browserRefreshBtn = document.getElementById('browser-refresh');
+        const browserAddress = document.getElementById('browser-address');
+        const browserGoBtn = document.getElementById('browser-go');
+        const browserIframe = document.getElementById('browser-iframe');
+        
+        // Security Center elements
+        const scanButton = document.getElementById('scan-button');
+        const scanProgress = document.getElementById('scan-progress');
+        const scanProgressBar = document.getElementById('scan-progress-bar');
+        const scanResults = document.getElementById('scan-results');
+        
+        // Sandbox elements
+        const sandboxCode = document.getElementById('sandbox-code');
+        const sandboxIframe = document.getElementById('sandbox-iframe');
+        const sandboxResults = document.getElementById('sandbox-results');
+        const runSandboxBtn = document.getElementById('run-sandbox');
+        const clearSandboxBtn = document.getElementById('clear-sandbox');
+        const scanSandboxBtn = document.getElementById('scan-sandbox');
+        
+        // Task Manager elements
+        const refreshProcessesBtn = document.getElementById('refresh-processes');
+        
+        // Window management variables
+        let zIndex = 10;
+        let activeWindow = null;
+        let isDragging = false;
+        let currentX, currentY, initialX, initialY;
+        let xOffset = 0, yOffset = 0;
+        let dragWindow = null;
+        
+        // Track running apps
+        const runningApps = new Map();
+        
+        // Emoji avatars for account setup
+        const emojiAvatars = ['👤', '👨', '👩', '🧑', '🧔', '👨‍💻', '👩‍💻', '🦸', '🦹', '🧙', '🧛', '🧝', '🧞', '🧟'];
+        
+        // Initialize avatar options
+        emojiAvatars.forEach(emoji => {
+            const option = document.createElement('div');
+            option.className = 'avatar-option';
+            option.textContent = emoji;
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                accountAvatar.textContent = emoji;
+            });
+            avatarOptions.appendChild(option);
+        });
+        
+        // Boot sequence
+        setTimeout(() => {
+            let progress = 0;
+            const bootInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                bootProgress.style.width = `${progress}%`;
+                
+                if (progress === 100) {
+                    clearInterval(bootInterval);
+                    setTimeout(() => {
+                        bootScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            bootScreen.style.display = 'none';
+                            setupWizard.style.display = 'flex';
+                        }, 500);
+                    }, 500);
+                }
+            }, 300);
+        }, 1000);
+        
+        // Setup wizard navigation
+        let currentStep = 0;
+        
+        function showStep(stepIndex) {
+            setupSteps.forEach((step, index) => {
+                step.classList.toggle('active', index === stepIndex);
+            });
+            currentStep = stepIndex;
+        }
+        
+        languageNext.addEventListener('click', () => showStep(1));
+        accountBack.addEventListener('click', () => showStep(0));
+        accountNext.addEventListener('click', () => {
+            if (accountName.value.trim() === '') {
+                alert('Please enter your name');
+                return;
+            }
+            showStep(2);
+        });
+        wifiBack.addEventListener('click', () => showStep(1));
+        wifiNext.addEventListener('click', () => showStep(3));
+        privacyBack.addEventListener('click', () => showStep(2));
+        
+        privacyFinish.addEventListener('click', () => {
+            setupWizard.style.opacity = '0';
+            setTimeout(() => {
+                setupWizard.style.display = 'none';
+                desktop.style.display = 'block';
+                taskbar.style.display = 'flex';
+                
+                // Set user info
+                userName.textContent = accountName.value;
+                userEmail.textContent = accountEmail.value || 'user@nexora.com';
+                userAvatar.textContent = accountAvatar.textContent;
+                
+                // Show welcome notification
+                setTimeout(() => {
+                    const notification = document.getElementById('notification');
+                    notification.classList.remove('hidden');
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 3000);
+                }, 1000);
+            }, 500);
+        });
+        
+        // Start menu toggle
+        startButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startMenu.classList.toggle('visible');
+        });
+        
+        // Close start menu when clicking elsewhere
+        document.addEventListener('click', () => {
+            startMenu.classList.remove('visible');
+        });
+        
+        // Context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+        });
+        
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
+        
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            clock.textContent = time;
+        }
+        
+        setInterval(updateClock, 1000);
+        updateClock();
+        
+        // Window management functions
+        function createTaskbarApp(appId, window) {
+            const app = document.createElement('div');
+            app.className = 'taskbar-app';
+            app.setAttribute('data-app', appId);
+            
+            const icon = document.createElement('div');
+            icon.className = 'taskbar-app-icon';
+            
+            // Get icon from window or use default
+            const windowIcon = window.querySelector('.window-title').textContent;
+            if (windowIcon.includes('Notepad')) icon.textContent = '📝';
+            else if (windowIcon.includes('Files')) icon.textContent = '📁';
+            else if (windowIcon.includes('Terminal')) icon.textContent = '💻';
+            else if (windowIcon.includes('Browser')) icon.textContent = '🌐';
+            else if (windowIcon.includes('Settings')) icon.textContent = '⚙️';
+            else if (windowIcon.includes('Security')) icon.textContent = '🔒';
+            else if (windowIcon.includes('Sandbox')) icon.textContent = '🧪';
+            else if (windowIcon.includes('Task Manager')) icon.textContent = '📊';
+            else icon.textContent = '📄';
+            
+            app.appendChild(icon);
+            app.addEventListener('click', () => {
+                if (window.classList.contains('window-minimized')) {
+                    restoreWindow(window);
+                } else {
+                    minimizeWindow(window);
+                }
+            });
+            
+            taskbarAppsRunning.appendChild(app);
+            return app;
+        }
+        
+        function minimizeWindow(window) {
+            window.classList.add('window-minimized');
+            window.classList.remove('active');
+            
+            // Update taskbar app state
+            const appId = window.getAttribute('data-app');
+            const taskbarApp = document.querySelector(`.taskbar-app[data-app="${appId}"]:not(.pinned)`);
+            if (taskbarApp) {
+                taskbarApp.classList.remove('active');
+            }
+        }
+        
+        function restoreWindow(window) {
+            window.classList.remove('window-minimized');
+            window.style.zIndex = zIndex++;
+            window.classList.add('active');
+            
+            if (activeWindow) {
+                activeWindow.classList.remove('active');
+            }
+            activeWindow = window;
+            
+            // Update taskbar app state
+            const appId = window.getAttribute('data-app');
+            const taskbarApp = document.querySelector(`.taskbar-app[data-app="${appId}"]:not(.pinned)`);
+            if (taskbarApp) {
+                taskbarApp.classList.add('active');
+            }
+        }
+        
+        function createWindow(appId) {
+            const window = document.getElementById(`${appId}-window`);
+            
+            // If window already exists, restore it
+            if (!window.classList.contains('hidden')) {
+                if (window.classList.contains('window-minimized')) {
+                    restoreWindow(window);
+                }
+                return window;
+            }
+            
+            window.classList.remove('hidden');
+            window.style.zIndex = zIndex++;
+            window.classList.add('active');
+            
+            if (activeWindow) {
+                activeWindow.classList.remove('active');
+            }
+            activeWindow = window;
+            
+            // Position window randomly but within viewport
+            const maxLeft = window.innerWidth - window.offsetWidth - 20;
+            const maxTop = window.innerHeight - window.offsetHeight - 60; // account for taskbar
+            
+            window.style.left = `${Math.max(20, Math.min(maxLeft, Math.random() * maxLeft))}px`;
+            window.style.top = `${Math.max(20, Math.min(maxTop, Math.random() * maxTop))}px`;
+            
+            // Add to running apps if not already there
+            if (!runningApps.has(appId)) {
+                const taskbarApp = createTaskbarApp(appId, window);
+                runningApps.set(appId, { window, taskbarApp });
+            }
+            
+            // Make window draggable
+            const header = window.querySelector('.window-header');
+            
+            header.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('window-control')) return;
+                
+                dragWindow = window;
+                initialX = e.clientX - window.getBoundingClientRect().left;
+                initialY = e.clientY - window.getBoundingClientRect().top;
+                
+                window.style.zIndex = zIndex++;
+                window.classList.add('active');
+                if (activeWindow) {
+                    activeWindow.classList.remove('active');
+                }
+                activeWindow = window;
+                
+                isDragging = true;
+            });
+            
+            // Window controls
+            const closeBtn = window.querySelector('.window-control.close');
+            const minimizeBtn = window.querySelector('.window-control.minimize');
+            const maximizeBtn = window.querySelector('.window-control.maximize');
+            
+            closeBtn.addEventListener('click', () => {
+                window.classList.add('hidden');
+                
+                // Remove from running apps
+                const appId = window.getAttribute('data-app');
+                if (runningApps.has(appId)) {
+                    const { taskbarApp } = runningApps.get(appId);
+                    taskbarApp.remove();
+                    runningApps.delete(appId);
+                }
+            });
+            
+            minimizeBtn.addEventListener('click', () => {
+                minimizeWindow(window);
+            });
+            
+            maximizeBtn.addEventListener('click', () => {
+                if (window.classList.contains('window-maximized')) {
+                    window.classList.remove('window-maximized');
+                    window.style.width = '';
+                    window.style.height = '';
+                    window.style.left = `${Math.max(20, Math.min(maxLeft, Math.random() * maxLeft))}px`;
+                    window.style.top = `${Math.max(20, Math.min(maxTop, Math.random() * maxTop))}px`;
+                } else {
+                    window.classList.add('window-maximized');
+                    window.style.width = 'calc(100% - 20px)';
+                    window.style.height = 'calc(100% - 60px)';
+                    window.style.left = '10px';
+                    window.style.top = '10px';
+                }
+            });
+            
+            return window;
+        }
+        
+        // Global mouse events for window dragging
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && dragWindow) {
+                e.preventDefault();
+                
+                const maxX = window.innerWidth - dragWindow.offsetWidth;
+                const maxY = window.innerHeight - dragWindow.offsetHeight;
+                
+                let newX = e.clientX - initialX;
+                let newY = e.clientY - initialY;
+                
+                // Keep window within bounds
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+                
+                dragWindow.style.left = `${newX}px`;
+                dragWindow.style.top = `${newY}px`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            dragWindow = null;
+        });
+        
+        // Open apps from desktop icons
+        desktopIcons.forEach(icon => {
+            icon.addEventListener('dblclick', () => {
+                const appId = icon.getAttribute('data-app');
+                createWindow(appId);
+            });
+        });
+        
+        // Open apps from start menu
+        startMenuApps.forEach(app => {
+            app.addEventListener('click', () => {
+                const appId = app.getAttribute('data-app');
+                createWindow(appId);
+                startMenu.classList.remove('visible');
+            });
+        });
+        
+        // Open pinned apps from taskbar
+        document.querySelectorAll('.taskbar-app.pinned').forEach(app => {
+            app.addEventListener('click', () => {
+                const appId = app.getAttribute('data-app');
+                createWindow(appId);
+            });
+        });
+        
+        // Terminal commands
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        
+        terminalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = terminalInput.value.trim();
+                terminalInput.value = '';
+                
+                // Add command to output
+                terminalOutput.innerHTML += `$ ${command}<br>`;
+                
+                // Process command
+                let response = '';
+                switch (command.toLowerCase()) {
+                    case 'help':
+                        response = `Available commands:<br>
+                            help - Show this help message<br>
+                            clear - Clear the terminal<br>
+                            about - Show system information<br>
+                            date - Show current date and time<br>
+                            neofetch - Show system information<br>`;
+                        break;
+                    case 'clear':
+                        terminalOutput.innerHTML = '';
+                        return;
+                    case 'about':
+                        response = `Nexora OS Terminal v1.0<br>
+                            Copyright © 2023 Nexora Systems<br>
+                            Type 'help' for a list of commands.`;
+                        break;
+                    case 'date':
+                        response = new Date().toString();
+                        break;
+                    case 'neofetch':
+                        response = `
+                            <pre style="font-family: monospace; line-height: 1.3;">
+                            user@nexora
+                            -----------
+                            OS: Nexora OS 1.0
+                            Host: Virtual Machine
+                            Kernel: 5.15.0-nexora
+                            Uptime: 5 mins
+                            Shell: /bin/bash
+                            CPU: Virtual CPU @ 2.4GHz
+                            Memory: 1024MB / 2048MB
+                            </pre>`;
+                        break;
+                    case '':
+                        response = '';
+                        break;
+                    default:
+                        response = `Command not found: ${command}<br>Type 'help' for a list of available commands.`;
+                }
+                
+                terminalOutput.innerHTML += `${response}<br><br>`;
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+        });
+        
+        // Browser functionality
+        browserGoBtn.addEventListener('click', () => {
+            let url = browserAddress.value.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            browserIframe.src = url;
+        });
+        
+        browserAddress.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                browserGoBtn.click();
+            }
+        });
+        
+        browserBackBtn.addEventListener('click', () => {
+            browserIframe.contentWindow.history.back();
+        });
+        
+        browserForwardBtn.addEventListener('click', () => {
+            browserIframe.contentWindow.history.forward();
+        });
+        
+        browserRefreshBtn.addEventListener('click', () => {
+            browserIframe.contentWindow.location.reload();
+        });
+        
+        // Security Center functionality
+        scanButton.addEventListener('click', () => {
+            scanProgress.classList.remove('hidden');
+            scanResults.classList.add('hidden');
+            
+            let progress = 0;
+            const scanInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                scanProgressBar.style.width = `${progress}%`;
+                
+                if (progress === 100) {
+                    clearInterval(scanInterval);
+                    setTimeout(() => {
+                        scanResults.classList.remove('hidden');
+                        scanResults.innerHTML = `
+                            <h3>Scan Results</h3>
+                            <p>Scan completed at ${new Date().toLocaleTimeString()}</p>
+                            <p>No threats detected.</p>
+                            <p>Your system is secure.</p>
+                        `;
+                    }, 500);
+                }
+            }, 200);
+        });
+        
+        // Sandbox functionality
+        runSandboxBtn.addEventListener('click', () => {
+            const code = sandboxCode.value;
+            sandboxIframe.srcdoc = code;
+            sandboxResults.style.display = 'none';
+        });
+        
+        clearSandboxBtn.addEventListener('click', () => {
+            sandboxCode.value = '';
+            sandboxIframe.srcdoc = '';
+            sandboxResults.style.display = 'none';
+        });
+        
+        scanSandboxBtn.addEventListener('click', () => {
+            sandboxResults.style.display = 'block';
+            sandboxResults.innerHTML = `
+                <h3>Scan Results</h3>
+                <p>Scan completed at ${new Date().toLocaleTimeString()}</p>
+                <p>No threats detected in sandbox environment.</p>
+                <p>Code is running in isolated container.</p>
+            `;
+        });
+        
+        // Task Manager functionality
+        refreshProcessesBtn.addEventListener('click', () => {
+            const processes = document.querySelectorAll('.taskmanager-process');
+            processes.forEach(process => {
+                const cpuCell = process.querySelector('.taskmanager-process-cpu');
+                const memoryCell = process.querySelector('.taskmanager-process-memory');
+                
+                // Randomize values for demo purposes
+                cpuCell.textContent = `${Math.floor(Math.random() * 30)}%`;
+                memoryCell.textContent = `${Math.floor(20 + Math.random() * 100)} MB`;
+            });
+        });
+        
+        // Power button actions
+        powerButton.addEventListener('click', () => {
+            const updateScreen = document.getElementById('update-screen');
+            updateScreen.classList.remove('hidden');
+            
+            let progress = 0;
+            const updateStatus = document.getElementById('update-status');
+            const updateProgress = document.querySelector('.update-progress-bar');
+            
+            const updateInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                updateProgress.style.width = `${progress}%`;
+                
+                if (progress < 30) {
+                    updateStatus.textContent = 'Downloading updates...';
+                } else if (progress < 70) {
+                    updateStatus.textContent = 'Installing updates...';
+                } else {
+                    updateStatus.textContent = 'Finishing up...';
+                }
+                
+                if (progress === 100) {
+                    clearInterval(updateInterval);
+                    setTimeout(() => {
+                        updateStatus.textContent = 'Update complete! Restarting...';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }, 500);
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>
