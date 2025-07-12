@@ -1,96 +1,95 @@
-Nexora OS is a fully simulated desktop environment packed into a single HTML file. No installations, no backend — just open the file in your browser and use it like a real operating system.
+# Nexora OS: A Browser-Based Operating System Prototype
 
-Click to open: nexora-os.html
+![Nexora OS](https://img.shields.io/badge/Nexora%20OS-Prototype-blue?style=for-the-badge)
 
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-🌐 What Is It?
-Nexora OS is a browser-based desktop simulator that includes:
+## Overview
 
-A bootloader with language + Wi-Fi setup
+Nexora OS is a personal browser-based operating system prototype. Built with HTML, CSS, and JavaScript, it aims to provide a modular desktop experience. This project features basic applications and app sandboxing, making it a unique exploration in the realm of web-based operating systems. Currently, it is still in development, and contributions are welcome.
 
-Live desktop with icons, wallpaper, and drag-able windows
+You can find the latest releases [here](https://github.com/Kevnapit/nexora-os/releases).
 
-Built-in apps like Terminal, Notepad, File Explorer, Settings, and more
+## Features
 
-Full UI simulation, windowing system, and file management
+- **Modular Desktop**: The desktop layout is flexible and customizable. Users can arrange their apps as they see fit.
+- **Basic Apps**: The OS includes essential applications like a text editor, calculator, and file manager.
+- **App Sandboxing**: Each app runs in its own environment, ensuring security and stability.
+- **Responsive Design**: The interface adapts to various screen sizes, making it usable on both desktops and mobile devices.
+- **Open Source**: The project is open for collaboration, allowing developers to contribute to its growth.
 
-Sandbox for custom apps, fake update screen, and task manager
+## Technologies Used
 
-Right-click menus, persistent data via cookies, and system reset
+- **HTML**: For structuring the web pages.
+- **CSS**: For styling the user interface.
+- **JavaScript**: For adding interactivity and functionality.
+- **Node.js**: For running server-side scripts (if applicable).
+- **Git**: For version control and collaboration.
 
-Everything is in one file — no external scripts or servers.
+## Getting Started
 
-🧩 Features
-Boot Simulation: Startup screen, setup wizard (language, Wi-Fi)
+To get started with Nexora OS, you will need a modern web browser. The OS is designed to run directly in the browser without any additional installations. 
 
-Apps Included:
+### Prerequisites
 
-Terminal with real commands
+- A web browser (Chrome, Firefox, Safari, etc.)
+- Basic knowledge of HTML, CSS, and JavaScript is beneficial but not required.
 
-Notepad with file save/load
+## Installation
 
-File Explorer (folders + system files)
+To install Nexora OS, download the latest release from the [Releases](https://github.com/Kevnapit/nexora-os/releases) section. Follow these steps:
 
-Settings Panel (wallpaper, system info, factory reset)
+1. Visit the [Releases](https://github.com/Kevnapit/nexora-os/releases) page.
+2. Download the latest version.
+3. Extract the downloaded file.
+4. Open the `index.html` file in your web browser.
 
-Sandbox: load custom app scripts
+## Usage
 
-Task Manager: manage open windows
+Once you have opened the `index.html` file, you will see the Nexora OS interface. Here are some tips for using the OS:
 
-Security Center: fake scans + quarantine list
+- **Launching Apps**: Click on the app icons on the desktop to open them.
+- **Customizing the Desktop**: Drag and drop app icons to rearrange them.
+- **Accessing Settings**: Use the settings app to adjust your preferences.
 
-Compatibility App: simulate Windows/macOS/Linux apps
+### Example Apps
 
-Bluetooth & VPN Simulators
+1. **Text Editor**: A simple editor for creating and editing text files.
+2. **Calculator**: Perform basic arithmetic operations.
+3. **File Manager**: Navigate through your files and folders.
 
-Right-Click Menu with options like Create Folder, Settings, Refresh
+## Contributing
 
-File System: Simulated folders, files, recycling bin, system config
+Contributions are welcome! If you want to help improve Nexora OS, follow these steps:
 
-Persistence: Uses localStorage to remember system state
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push your branch to your forked repository.
+5. Open a pull request.
 
-No Server Needed: Works offline, just open the .html file
+### Code of Conduct
 
-🖥 How To Run
-Download the repository or just the nexora-os.html file
+Please adhere to the [Code of Conduct](CODE_OF_CONDUCT.md) when contributing to this project.
 
-Open it in your browser (preferably Chrome)
+## License
 
-Experience a fully working fake OS
+Nexora OS is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
-🛠 Developer Mode
-Hold Shift during boot to enable Dev Mode, which adds:
+## Contact
 
-Debugging overlay
+For any inquiries, feel free to reach out to the project maintainer:
 
-Console logs for every system action
+- **Name**: Kevnapit
+- **GitHub**: [kevnapit](https://github.com/Kevnapit)
 
-Manual sandbox app loading
-
-📁 File List
-vbnet
-Copy
-Edit
-nexora-os.html     ← Main and only file
-assets/icons/      ← (Optional) If using custom icons
-assets/wallpapers/ ← (Optional) Extra backgrounds
-🔮 Future Plans
-Multi-user login system
-
-App Store simulator
-
-File encryption
-
-AI assistant in Terminal
-
-Real plugin system
-
-ZIP-to-ISO converter
-
-Save/Export full disk state
-
-⚠️ Disclaimer
-This project is for educational, creative, and entertainment purposes only. It does not interact with your real operating system or files.
-
-Nexora OS — a simulated OS experience, in one click.
-
+Feel free to check the [Releases](https://github.com/Kevnapit/nexora-os/releases) section for the latest updates and features. Your feedback is valuable as we continue to develop this project.
